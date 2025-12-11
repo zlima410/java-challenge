@@ -13,6 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Service layer for managing Employee entities.
+ * Uses in-memory storage for demonstration purposes.
+ */
 @Service
 public class EmployeeService {
     private final Map<UUID, Employee> employeeStore = new ConcurrentHashMap<>();
@@ -21,10 +25,22 @@ public class EmployeeService {
         initializeMockData();
     }
 
+    /**
+     * Retrieves all employees from the store.
+     *
+     * @return List of all employees, unfiltered
+     */
     public List<Employee> getAllEmployees() {
         return new ArrayList<>(employeeStore.values());
     }
 
+    /**
+     * Retrieves an employee by their UUID.
+     *
+     * @param uuid Employee UUID
+     * @return Requested Employee if exists
+     * @throws ResponseStatusException with NOT_FOUND status if employee does not exist
+     */
     public Employee getEmployeeByUuid(UUID uuid) {
         Employee employee = employeeStore.get(uuid);
         if (employee == null) 
@@ -33,7 +49,19 @@ public class EmployeeService {
         return employee;
     }
 
+    /**
+    * Creates a new employee from the provided request data.
+    * Generates a UUID and computes fullName from firstName and lastName.
+    * 
+    * @param request Employee creation request
+    * @return Created employee with generated UUID
+    * @throws ResponseStatusException if required fields are missing or invalid
+    */
     public Employee createEmployee(CreateEmployeeRequest request) {
+        if (request.getFirstName() == null || request.getLastName() == null || request.getSalary() == null || request.getAge() == null || request.getJobTitle() == null || request.getEmail() == null || request.getContractHireDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required fields");
+        }
+
         EmployeeImpl employee = new EmployeeImpl();
         employee.setUuid(UUID.randomUUID());
         employee.setFirstName(request.getFirstName());
@@ -50,6 +78,9 @@ public class EmployeeService {
         return employee;
     }
 
+    /**
+     * Initializes the employee store with mock data for demonstration purposes.
+     */
     private void initializeMockData() {
         EmployeeImpl employee1 = new EmployeeImpl();
         employee1.setUuid(UUID.randomUUID());
